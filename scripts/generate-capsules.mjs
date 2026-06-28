@@ -1,98 +1,69 @@
 import { access, mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import Replicate from "replicate";
-import { CAPSULES_TO_GENERATE } from "./capsule-prompts.mjs";
 
 const UPLOADS_DIR = join(process.cwd(), "public/uploads/clothes");
 const MODEL = "black-forest-labs/flux-schnell";
 const THROTTLE_MS = 5000;
 
+const STYLE =
+  "Style fusion: The Row, Reformation, Zara. Leica SL2, 85mm, soft studio light, off-white wall, Vogue editorial, 8k, single model, anatomically correct.";
+const NEGATIVE =
+  "Avoid: deformed limbs, extra legs, three feet, mutated hands, duplicate limbs, blurry, watermark, text.";
+
+function buildPrompt(garment, variant) {
+  const facing =
+    variant === "front"
+      ? "ONE model facing the camera"
+      : "the SAME model from behind";
+  return `High-end fashion editorial photograph of ${facing}, wearing ${garment}. ${STYLE} ${NEGATIVE}`;
+}
+
+const CAPSULES = [
+  ["capsule-007", 7007, "a structured cotton poplin shirt dress in crisp optic white with button-front placket and knee-length hem", "the EXACT SAME white poplin shirt dress — identical fabric and tailoring — with back yoke and center back pleat"],
+  ["capsule-008", 7008, "a champagne satin bias-cut midi skirt with high waist and gentle flare, paired with a fitted black tank", "the EXACT SAME champagne satin midi skirt — identical satin and drape — with clean back waistband, same black tank"],
+  ["capsule-009", 7009, "a sand beige double-breasted long linen-blend coat with peak lapels and oversized silhouette below the knee", "the EXACT SAME sand beige long coat — identical linen texture and color — with center back seam and ventless back"],
+  ["capsule-010", 7010, "a charcoal ribbed merino set: scoop-neck tank and high-waisted wide-leg trousers", "the EXACT SAME charcoal ribbed merino set — identical knit and color — scoop back tank and wide-leg trouser back"],
+  ["capsule-011", 7011, "a black crepe one-shoulder floor-length gown with draped bodice and column silhouette", "the EXACT SAME black crepe one-shoulder gown — identical fabric and drape — open back with single strap"],
+  ["capsule-012", 8012, "an oversized oatmeal heather cashmere crewneck with dropped shoulders, long ribbed sleeves, and black trousers", "the EXACT SAME oatmeal cashmere crewneck — identical knit, color, crew neck, sleeve length, and ribbed hem — same black trousers"],
+].map(([id, seed, frontGarment, backGarment]) => ({
+  id,
+  seed,
+  front: buildPrompt(frontGarment, "front"),
+  back: buildPrompt(backGarment, "back"),
+}));
+
 function loadEnvLocal() {
   try {
-    const raw = readFileSync(join(process.cwd(), ".env.local"), "utf-8");
-    for (const line of raw.split("\n")) {
+    for (const line of readFileSync(join(process.cwd(), ".env.local"), "utf-8").split("\n")) {
       const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("#")) {
-        continue;
-      }
+      if (!trimmed || trimmed.startsWith("#")) continue;
       const eq = trimmed.indexOf("=");
-      if (eq === -1) {
-        continue;
-      }
+      if (eq === -1) continue;
       const key = trimmed.slice(0, eq).trim();
       let value = trimmed.slice(eq + 1).trim();
-      if (
-        (value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))
-      ) {
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
         value = value.slice(1, -1);
       }
       process.env[key] ??= value;
     }
   } catch {
-    // .env.local optional when token already exported
+    /* token may already be exported */
   }
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function extractImageUrl(output) {
-  if (typeof output === "string") {
-    return output;
-  }
-  if (Array.isArray(output) && output.length > 0) {
-    return extractImageUrl(output[0]);
-  }
-  if (output && typeof output === "object" && "url" in output) {
-    const url = output.url;
-    if (typeof url === "function") {
-      return url().href;
-    }
-    if (typeof url === "string") {
-      return url;
-    }
-  }
-  throw new Error("Unexpected Replicate output format");
-}
-
-async function fileExists(path) {
-  try {
-    await access(path);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function downloadToFile(remoteUrl, diskPath) {
-  const response = await fetch(remoteUrl);
-  if (!response.ok) {
-    throw new Error(`Download failed: HTTP ${response.status}`);
-  }
-  const buffer = Buffer.from(await response.arrayBuffer());
-  await writeFile(diskPath, buffer);
-}
-
-async function generateImage(replicate, prompt, seed) {
-  const output = await replicate.run(MODEL, {
-    input: {
-      prompt,
-      seed,
-      aspect_ratio: "3:4",
-      num_outputs: 1,
-      output_format: "webp",
-      output_quality: 90,
-    },
-  });
-  return extractImageUrl(output);
+  if (typeof output === "string") return output;
+  if (Array.isArray(output) && output.length) return extractImageUrl(output[0]);
+  if (output?.url) return typeof output.url === "function" ? output.url().href : output.url;
+  throw new Error("Unexpected Replicate output");
 }
 
 async function main() {
   loadEnvLocal();
-
   const token = process.env.REPLICATE_API_TOKEN;
   if (!token) {
     console.error("REPLICATE_API_TOKEN is not set in .env.local");
@@ -102,58 +73,53 @@ async function main() {
   await mkdir(UPLOADS_DIR, { recursive: true });
   const replicate = new Replicate({ auth: token });
 
-  const results = [];
-
-  for (const capsule of CAPSULES_TO_GENERATE) {
+  for (const capsule of CAPSULES) {
     for (const variant of ["front", "back"]) {
-      const filename =
-        variant === "front" ? `${capsule.id}.webp` : `${capsule.id}-back.webp`;
+      const filename = variant === "front" ? `${capsule.id}.webp` : `${capsule.id}-back.webp`;
       const diskPath = join(UPLOADS_DIR, filename);
 
-      if (await fileExists(diskPath)) {
-        console.log(`skip ${filename} (already exists)`);
-        results.push({ file: filename, status: "skipped" });
+      try {
+        await access(diskPath);
+        console.log(`skip ${filename}`);
         continue;
+      } catch {
+        /* generate */
       }
 
-      const prompt = variant === "front" ? capsule.front : capsule.back;
       console.log(`generating ${filename}…`);
+      let saved = false;
 
-      let lastError;
-      for (let attempt = 0; attempt <= 3; attempt++) {
+      for (let attempt = 0; attempt <= 3 && !saved; attempt++) {
         try {
-          const remoteUrl = await generateImage(replicate, prompt, capsule.seed);
-          await downloadToFile(remoteUrl, diskPath);
+          const output = await replicate.run(MODEL, {
+            input: {
+              prompt: variant === "front" ? capsule.front : capsule.back,
+              seed: capsule.seed,
+              aspect_ratio: "3:4",
+              num_outputs: 1,
+              output_format: "webp",
+              output_quality: 90,
+            },
+          });
+          const response = await fetch(extractImageUrl(output));
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          await writeFile(diskPath, Buffer.from(await response.arrayBuffer()));
           console.log(`saved ${filename}`);
-          results.push({ file: filename, status: "ok" });
-          lastError = null;
-          break;
+          saved = true;
         } catch (error) {
-          lastError = error;
-          const message =
-            error instanceof Error ? error.message : String(error);
+          const message = error instanceof Error ? error.message : String(error);
           if (message.includes("429") && attempt < 3) {
-            const wait = (attempt + 1) * 9000;
-            console.warn(`rate limited — waiting ${wait / 1000}s…`);
-            await sleep(wait);
+            await sleep((attempt + 1) * 9000);
             continue;
           }
+          console.error(`failed ${filename}:`, error);
+          process.exitCode = 1;
+          break;
         }
-      }
-
-      if (lastError) {
-        console.error(`failed ${filename}:`, lastError);
-        results.push({ file: filename, status: "failed" });
-        process.exitCode = 1;
       }
 
       await sleep(THROTTLE_MS);
     }
-  }
-
-  console.log("\nSummary:");
-  for (const row of results) {
-    console.log(`  ${row.status.padEnd(7)} ${row.file}`);
   }
 }
 

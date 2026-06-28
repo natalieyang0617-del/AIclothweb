@@ -1,5 +1,4 @@
-import { readJson, writeJson } from "@/lib/storage/local-storage";
-import { getProductById, mockProducts } from "@/data/mockProducts";
+import { getProductById } from "@/data/mockProducts";
 
 export type ProductSize = "XS" | "S" | "M" | "L";
 
@@ -22,6 +21,22 @@ const LAUNCH_NOTIFICATIONS_KEY = "vibe-launch-notifications";
 
 export const PREORDERS_UPDATED_EVENT = "vibe-preorders-updated";
 export const VOTES_UPDATED_EVENT = "vibe-votes-updated";
+
+function readJson<T>(key: string, fallback: T): T {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeJson<T>(key: string, value: T): void {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  }
+}
 
 function readVotes(): Record<string, number> {
   const parsed = readJson<unknown>(VOTES_KEY, {});
@@ -66,7 +81,6 @@ export function savePreorder(
     size,
     confirmedAt: new Date().toISOString(),
   };
-
   writeJson(PREORDERS_KEY, [...readPreorders(), record]);
   dispatch(PREORDERS_UPDATED_EVENT);
   return record;
@@ -89,7 +103,6 @@ export function getLatestPreorderForProduct(
 export function saveLaunchNotificationEmail(email: string): void {
   const normalized = email.trim().toLowerCase();
   const existing = readJson<string[]>(LAUNCH_NOTIFICATIONS_KEY, []);
-
   if (!existing.includes(normalized)) {
     writeJson(LAUNCH_NOTIFICATIONS_KEY, [...existing, normalized]);
   }
@@ -99,17 +112,15 @@ export function enrichPreorders(records: PreorderRecord[]): EnrichedPreorder[] {
   return records
     .map((record) => {
       const product = getProductById(record.productId);
-      if (!product) {
-        return null;
-      }
-
-      return {
-        ...record,
-        title: product.title,
-        price: product.price,
-        imageUrl: product.imageUrl,
-        fallbackImageUrl: product.fallbackImageUrl,
-      };
+      return product
+        ? {
+            ...record,
+            title: product.title,
+            price: product.price,
+            imageUrl: product.imageUrl,
+            fallbackImageUrl: product.fallbackImageUrl,
+          }
+        : null;
     })
     .filter((item): item is EnrichedPreorder => item !== null)
     .reverse();

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import ProductImage from "@/components/ProductImage";
 import LaunchProgressBar from "@/components/product/LaunchProgressBar";
 import SiteHeader from "@/components/SiteHeader";
-import { useProductVotes } from "@/hooks/useProductVotes";
+import { useProductVotes } from "@/hooks/useStoreSync";
 import type { Product } from "@/data/mockProducts";
 import {
   getLatestPreorderForProduct,

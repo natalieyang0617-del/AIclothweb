@@ -1,8 +1,8 @@
-import HeroLookbook from "@/components/HeroLookbook";
+import ProductImage from "@/components/ProductImage";
 import ProductCard from "@/components/ProductCard";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { mockProducts } from "@/data/mockProducts";
+import { HERO_LOOKBOOK, mockProducts } from "@/data/mockProducts";
 
 const curatedAesthetics = [
   "Grunge Core",
@@ -39,7 +39,14 @@ export default function Home() {
           </div>
         </div>
 
-        <HeroLookbook />
+        <div className="relative min-h-[420px] lg:min-h-[680px]">
+          <ProductImage
+            src={HERO_LOOKBOOK.imageUrl}
+            fallbackSrc={HERO_LOOKBOOK.fallbackImageUrl}
+            alt="Spring 2026 editorial streetwear lookbook"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </div>
       </section>
 
       <section

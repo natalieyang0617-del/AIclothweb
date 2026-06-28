@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import ProductImage from "@/components/ProductImage";
 import LaunchProgressBar from "@/components/product/LaunchProgressBar";
-import { useProductVotes } from "@/hooks/useProductVotes";
+import { useProductVotes } from "@/hooks/useStoreSync";
 import type { Product } from "@/data/mockProducts";
 
 export default function ProductCard({ product }: { product: Product }) {
