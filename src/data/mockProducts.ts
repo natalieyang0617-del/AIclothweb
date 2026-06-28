@@ -172,4 +172,154 @@ export const mockProducts: Product[] = [
     price: 168,
     daysLeft: 3,
   },
+  {
+    id: "capsule-007",
+    title: "Structured Cotton Poplin Shirt Dress",
+    collectionSubtitle: "Urban Tailored Capsule",
+    description:
+      "A crisp optic-white cotton poplin shirt dress with a sharp pointed collar, oversized boxy bodice, and clean knee-length hem — minimal tailoring meets everyday ease.",
+    frontDescription:
+      "Button-front placket, dropped shoulders, and a straight knee-length cut on crisp white poplin.",
+    backDescription:
+      "Back yoke seam and center back pleat on the same white poplin shirt dress.",
+    imageUrl: productImage("capsule-007"),
+    backImageUrl: backImage("capsule-007"),
+    fallbackImageUrl:
+      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600",
+    trendTags: [
+      "Quiet Luxury",
+      "Urban Tailored",
+      "Shirt Dress",
+      "Poplin",
+    ],
+    currentVotes: 12,
+    targetVotes: DEFAULT_TARGET_VOTES,
+    price: 175,
+    daysLeft: 5,
+  },
+  {
+    id: "capsule-008",
+    title: "Satin Bias-Cut Midi Skirt",
+    collectionSubtitle: "Minimalist Romance Collection",
+    description:
+      "A champagne satin bias-cut midi skirt with liquid drape and subtle sheen. High waist, clean waistband, and a gentle flare to mid-calf.",
+    frontDescription:
+      "Champagne satin midi skirt with high waist and fluid bias-cut drape, styled with a fitted black tank.",
+    backDescription:
+      "Same champagne satin skirt from behind, showing clean back waistband and fluid hem movement.",
+    imageUrl: productImage("capsule-008"),
+    backImageUrl: backImage("capsule-008"),
+    fallbackImageUrl:
+      "https://images.unsplash.com/photo-1583490280506-7638a3a3756b?q=80&w=600",
+    trendTags: [
+      "Romantic Minimalism",
+      "Bias Cut",
+      "Satin",
+      "Midi Silhouette",
+    ],
+    currentVotes: 19,
+    targetVotes: DEFAULT_TARGET_VOTES,
+    price: 158,
+    daysLeft: 4,
+  },
+  {
+    id: "capsule-009",
+    title: "Double-Breasted Linen-Blend Long Coat",
+    collectionSubtitle: "Urban Tailored Capsule",
+    description:
+      "A sand beige double-breasted long coat in linen blend with peak lapels, six-button front, and a relaxed oversized silhouette falling below the knee.",
+    frontDescription:
+      "Peak lapels and six-button double-breasted front on sand beige linen-blend coat.",
+    backDescription:
+      "Center back seam and clean ventless back on the same sand beige long coat.",
+    imageUrl: productImage("capsule-009"),
+    backImageUrl: backImage("capsule-009"),
+    fallbackImageUrl:
+      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=600",
+    trendTags: [
+      "Quiet Luxury",
+      "Urban Tailored",
+      "Outerwear",
+      "Linen Blend",
+    ],
+    currentVotes: 27,
+    targetVotes: DEFAULT_TARGET_VOTES,
+    price: 320,
+    daysLeft: 6,
+  },
+  {
+    id: "capsule-010",
+    title: "Ribbed Merino Tank & Wide Leg Set",
+    collectionSubtitle: "Urban Romantic Capsule",
+    description:
+      "A coordinated charcoal ribbed merino set: scoop-neck tank and high-waisted wide-leg trousers in matching knit. Clean lines, elevated comfort.",
+    frontDescription:
+      "Charcoal ribbed merino tank with scoop neck paired with matching high-waisted wide-leg trousers.",
+    backDescription:
+      "Same charcoal ribbed set from behind — scoop back tank and clean wide-leg trouser silhouette.",
+    imageUrl: productImage("capsule-010"),
+    backImageUrl: backImage("capsule-010"),
+    fallbackImageUrl:
+      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?q=80&w=600",
+    trendTags: [
+      "Urban Tailored",
+      "Knit Set",
+      "Wide Leg",
+      "Merino Wool",
+    ],
+    currentVotes: 15,
+    targetVotes: DEFAULT_TARGET_VOTES,
+    price: 210,
+    daysLeft: 3,
+  },
+  {
+    id: "capsule-011",
+    title: "Draped One-Shoulder Crepe Gown",
+    collectionSubtitle: "Minimalist Romance Collection",
+    description:
+      "A black crepe one-shoulder floor-length gown with an asymmetric strap, draped bodice, and column silhouette — minimal romance for evening.",
+    frontDescription:
+      "Asymmetric one-shoulder strap and draped bodice on a black crepe floor-length column gown.",
+    backDescription:
+      "Open back with elegant drape and single strap on the same black crepe gown.",
+    imageUrl: productImage("capsule-011"),
+    backImageUrl: backImage("capsule-011"),
+    fallbackImageUrl:
+      "https://images.unsplash.com/photo-1566174053879-31528523f8ae?q=80&w=600",
+    trendTags: [
+      "Romantic Minimalism",
+      "One Shoulder",
+      "Crepe",
+      "Evening Column",
+    ],
+    currentVotes: 33,
+    targetVotes: DEFAULT_TARGET_VOTES,
+    price: 285,
+    daysLeft: 5,
+  },
+  {
+    id: "capsule-012",
+    title: "Cropped Tailored Wool Vest",
+    collectionSubtitle: "Urban Tailored Capsule",
+    description:
+      "A deep navy cropped wool vest with V-neck, four-button front, and structured waist — sharp layering piece worn over a white tee.",
+    frontDescription:
+      "Deep navy cropped wool vest with V-neck and four-button front over a white tee.",
+    backDescription:
+      "Clean back panel and adjustable back tab on the same navy cropped wool vest.",
+    imageUrl: productImage("capsule-012"),
+    backImageUrl: backImage("capsule-012"),
+    fallbackImageUrl:
+      "https://images.unsplash.com/photo-1594633312681-425a7b956cc9?q=80&w=600",
+    trendTags: [
+      "Quiet Luxury",
+      "Urban Tailored",
+      "Layering",
+      "Wool Vest",
+    ],
+    currentVotes: 21,
+    targetVotes: DEFAULT_TARGET_VOTES,
+    price: 165,
+    daysLeft: 4,
+  },
 ];
