@@ -87,13 +87,13 @@ export const CAPSULES_TO_GENERATE = [
   },
   {
     id: "capsule-012",
-    seed: 7012,
+    seed: 8012,
     front: buildPrompt(
-      "a cropped tailored wool vest in deep navy with V-neck, four-button front, structured waist, worn over a white tee",
+      "an oversized oatmeal heather cashmere crewneck sweater: fine-gauge brushed cashmere knit, classic crew neckline, dropped shoulders, long sleeves with wide ribbed cuffs, ribbed hem hitting high hip, relaxed boxy fit, paired with simple black straight-leg trousers",
       "front",
     ),
     back: buildPrompt(
-      "the EXACT SAME deep navy cropped wool vest — identical wool texture, navy color, and cropped tailoring — with clean back panel and adjustable back tab, white tee visible at hem",
+      "the EXACT SAME oversized oatmeal heather cashmere crewneck sweater — identical fine-gauge brushed cashmere knit, identical oatmeal heather color, identical crew neckline, identical dropped shoulders, identical long sleeves with wide ribbed cuffs, identical ribbed hem length, identical relaxed boxy fit, same black straight-leg trousers",
       "back",
     ),
   },

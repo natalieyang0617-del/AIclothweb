@@ -299,27 +299,27 @@ export const mockProducts: Product[] = [
   },
   {
     id: "capsule-012",
-    title: "Cropped Tailored Wool Vest",
-    collectionSubtitle: "Urban Tailored Capsule",
+    title: "Oversized Oatmeal Cashmere Crewneck",
+    collectionSubtitle: "Minimalist Romance Collection",
     description:
-      "A deep navy cropped wool vest with V-neck, four-button front, and structured waist — sharp layering piece worn over a white tee.",
+      "A relaxed oversized crewneck in fine oatmeal heather cashmere with dropped shoulders, wide ribbed cuffs, and a soft brushed finish — quiet luxury layering for everyday.",
     frontDescription:
-      "Deep navy cropped wool vest with V-neck and four-button front over a white tee.",
+      "Oatmeal heather cashmere crewneck with dropped shoulders, long sleeves, and ribbed cuffs over black trousers.",
     backDescription:
-      "Clean back panel and adjustable back tab on the same navy cropped wool vest.",
+      "Same oatmeal cashmere sweater from behind — matching crew neck, sleeve length, ribbed hem, and relaxed boxy fit.",
     imageUrl: productImage("capsule-012"),
     backImageUrl: backImage("capsule-012"),
     fallbackImageUrl:
-      "https://images.unsplash.com/photo-1594633312681-425a7b956cc9?q=80&w=600",
+      "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=600",
     trendTags: [
       "Quiet Luxury",
-      "Urban Tailored",
+      "Cashmere Knit",
+      "Oversized Fit",
       "Layering",
-      "Wool Vest",
     ],
     currentVotes: 21,
     targetVotes: DEFAULT_TARGET_VOTES,
-    price: 165,
+    price: 195,
     daysLeft: 4,
   },
 ];
