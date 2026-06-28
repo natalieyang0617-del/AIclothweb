@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# ai image cache (manifest only; images live in public/uploads/clothes/)
+/.cache/
+
+# generated lookbook uploads
+/public/uploads/clothes/*
+!/public/uploads/clothes/.gitkeep
