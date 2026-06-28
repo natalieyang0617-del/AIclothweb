@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   getPreorderCount,
   PREORDERS_UPDATED_EVENT,
 } from "@/lib/preorder-storage";
+import { useStoreSync } from "@/hooks/useStoreSync";
 
 interface SiteHeaderProps {
   showNav?: boolean;
@@ -18,22 +19,9 @@ export default function SiteHeader({
   activePath,
 }: SiteHeaderProps) {
   const [preorderCount, setPreorderCount] = useState(0);
+  const sync = useCallback(() => setPreorderCount(getPreorderCount()), []);
 
-  useEffect(() => {
-    function refreshCount() {
-      setPreorderCount(getPreorderCount());
-    }
-
-    refreshCount();
-
-    window.addEventListener(PREORDERS_UPDATED_EVENT, refreshCount);
-    window.addEventListener("storage", refreshCount);
-
-    return () => {
-      window.removeEventListener(PREORDERS_UPDATED_EVENT, refreshCount);
-      window.removeEventListener("storage", refreshCount);
-    };
-  }, []);
+  useStoreSync(sync, [PREORDERS_UPDATED_EVENT]);
 
   return (
     <header className="border-b border-neutral-200 bg-white">

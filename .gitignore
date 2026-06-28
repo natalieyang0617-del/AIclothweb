@@ -43,6 +43,5 @@ next-env.d.ts
 # ai image cache (manifest only; images live in public/uploads/clothes/)
 /.cache/
 
-# generated lookbook uploads
-/public/uploads/clothes/*
-!/public/uploads/clothes/.gitkeep
+# generated lookbook uploads (committed for static deploy)
+/public/uploads/clothes/.DS_Store

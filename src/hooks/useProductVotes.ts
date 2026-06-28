@@ -1,25 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProductVotes } from "@/lib/preorder-storage";
+import { useCallback, useState } from "react";
+import {
+  getProductVotes,
+  VOTES_UPDATED_EVENT,
+} from "@/lib/preorder-storage";
+import { useStoreSync } from "@/hooks/useStoreSync";
 
 export function useProductVotes(productId: string, baseVotes: number): number {
   const [currentVotes, setCurrentVotes] = useState(baseVotes);
+  const sync = useCallback(
+    () => setCurrentVotes(getProductVotes(productId, baseVotes)),
+    [productId, baseVotes],
+  );
 
-  useEffect(() => {
-    const sync = () => setCurrentVotes(getProductVotes(productId, baseVotes));
-
-    sync();
-    window.addEventListener("storage", sync);
-    window.addEventListener("vibe-votes-updated", sync);
-    window.addEventListener("focus", sync);
-
-    return () => {
-      window.removeEventListener("storage", sync);
-      window.removeEventListener("vibe-votes-updated", sync);
-      window.removeEventListener("focus", sync);
-    };
-  }, [productId, baseVotes]);
+  useStoreSync(sync, [VOTES_UPDATED_EVENT]);
 
   return currentVotes;
 }

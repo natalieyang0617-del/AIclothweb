@@ -1,10 +1,8 @@
-"use client";
-
 import HeroLookbook from "@/components/HeroLookbook";
 import ProductCard from "@/components/ProductCard";
+import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { mockProducts, SITE_FOOTER } from "@/data/mockProducts";
-import { useProductImageHydration } from "@/hooks/useProductImageHydration";
+import { mockProducts } from "@/data/mockProducts";
 
 const curatedAesthetics = [
   "Grunge Core",
@@ -16,13 +14,6 @@ const curatedAesthetics = [
 ];
 
 export default function Home() {
-  const {
-    displayProducts,
-    statusMessage,
-    isRegeneratingAll,
-    regenerateAllPairs,
-  } = useProductImageHydration(mockProducts);
-
   return (
     <div className="min-h-screen bg-[#f9f9f9] text-zinc-900">
       <SiteHeader showNav activePath="shop" />
@@ -86,48 +77,15 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            {statusMessage && (
-              <p className="text-[11px] uppercase tracking-[0.18em] text-neutral-500">
-                {statusMessage}
-              </p>
-            )}
-
-            <button
-              type="button"
-              onClick={() => void regenerateAllPairs()}
-              disabled={isRegeneratingAll}
-              className="self-start border border-black bg-black px-4 py-2 text-[10px] uppercase tracking-[0.16em] text-white transition-colors hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {isRegeneratingAll
-                ? "Regenerating all pairs…"
-                : "Regenerate All Pairs (Seed-Pinned)"}
-            </button>
-          </div>
-
           <div className="grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-10 xl:gap-y-20">
-            {displayProducts.map((product) => (
-              <div key={product.id} className="relative">
-                {product.isGenerating && (
-                  <span className="absolute right-0 top-0 z-10 bg-white px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-neutral-500">
-                    Generating…
-                  </span>
-                )}
-                <ProductCard product={product} />
-              </div>
+            {mockProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-neutral-200 bg-white px-6 py-10 sm:px-10 lg:px-16">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <span className="text-[11px] uppercase tracking-[0.28em] text-neutral-500">
-            {SITE_FOOTER.brand}
-          </span>
-          <p className="text-[11px] text-neutral-400">{SITE_FOOTER.tagline}</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

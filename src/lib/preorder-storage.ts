@@ -1,6 +1,5 @@
 import { readJson, writeJson } from "@/lib/storage/local-storage";
-import { mockProducts } from "@/data/mockProducts";
-import { getClientCachedImageUrl } from "@/lib/image-cache-client";
+import { getProductById, mockProducts } from "@/data/mockProducts";
 
 export type ProductSize = "XS" | "S" | "M" | "L";
 
@@ -22,6 +21,7 @@ const PREORDERS_KEY = "vibe-product-preorders";
 const LAUNCH_NOTIFICATIONS_KEY = "vibe-launch-notifications";
 
 export const PREORDERS_UPDATED_EVENT = "vibe-preorders-updated";
+export const VOTES_UPDATED_EVENT = "vibe-votes-updated";
 
 function readVotes(): Record<string, number> {
   const parsed = readJson<unknown>(VOTES_KEY, {});
@@ -35,10 +35,13 @@ function readPreorders(): PreorderRecord[] {
   return Array.isArray(parsed) ? (parsed as PreorderRecord[]) : [];
 }
 
-export function getProductVotes(
-  productId: string,
-  baseVotes: number,
-): number {
+function dispatch(eventName: string): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(eventName));
+  }
+}
+
+export function getProductVotes(productId: string, baseVotes: number): number {
   return readVotes()[productId] ?? baseVotes;
 }
 
@@ -50,15 +53,7 @@ export function incrementProductVotes(
   const next = (votes[productId] ?? baseVotes) + 1;
   votes[productId] = next;
   writeJson(VOTES_KEY, votes);
-
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(
-      new CustomEvent("vibe-votes-updated", {
-        detail: { productId, votes: next },
-      }),
-    );
-  }
-
+  dispatch(VOTES_UPDATED_EVENT);
   return next;
 }
 
@@ -66,20 +61,14 @@ export function savePreorder(
   productId: string,
   size: ProductSize,
 ): PreorderRecord {
-  const preorders = readPreorders();
   const record: PreorderRecord = {
     productId,
     size,
     confirmedAt: new Date().toISOString(),
   };
 
-  preorders.push(record);
-  writeJson(PREORDERS_KEY, preorders);
-
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent(PREORDERS_UPDATED_EVENT));
-  }
-
+  writeJson(PREORDERS_KEY, [...readPreorders(), record]);
+  dispatch(PREORDERS_UPDATED_EVENT);
   return record;
 }
 
@@ -91,14 +80,10 @@ export function getPreorderCount(): number {
   return readPreorders().length;
 }
 
-export function getPreordersForProduct(productId: string): PreorderRecord[] {
-  return readPreorders().filter((record) => record.productId === productId);
-}
-
 export function getLatestPreorderForProduct(
   productId: string,
 ): PreorderRecord | null {
-  return getPreordersForProduct(productId).at(-1) ?? null;
+  return readPreorders().filter((r) => r.productId === productId).at(-1) ?? null;
 }
 
 export function saveLaunchNotificationEmail(email: string): void {
@@ -113,7 +98,7 @@ export function saveLaunchNotificationEmail(email: string): void {
 export function enrichPreorders(records: PreorderRecord[]): EnrichedPreorder[] {
   return records
     .map((record) => {
-      const product = mockProducts.find((item) => item.id === record.productId);
+      const product = getProductById(record.productId);
       if (!product) {
         return null;
       }
@@ -122,8 +107,7 @@ export function enrichPreorders(records: PreorderRecord[]): EnrichedPreorder[] {
         ...record,
         title: product.title,
         price: product.price,
-        imageUrl:
-          getClientCachedImageUrl(record.productId) ?? product.fallbackImageUrl,
+        imageUrl: product.imageUrl,
         fallbackImageUrl: product.fallbackImageUrl,
       };
     })

@@ -1,29 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ProductImage from "@/components/ProductImage";
 import LaunchProgressBar from "@/components/product/LaunchProgressBar";
-import { isBackViewGenerating } from "@/lib/image-pipeline";
-import {
-  getBackCachedImageUrl,
-  getBackViewCacheKey,
-  IMAGE_CACHED_EVENT,
-} from "@/lib/image-cache-client";
 import { useProductVotes } from "@/hooks/useProductVotes";
-import type { ProductDisplay } from "@/data/mockProducts";
+import type { Product } from "@/data/mockProducts";
 
-interface ProductCardProps {
-  product: ProductDisplay;
-}
-
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product }: { product: Product }) {
   const {
     id,
     title,
     collectionSubtitle,
     description,
     imageUrl,
+    backImageUrl,
     fallbackImageUrl,
     trendTags,
     price,
@@ -33,38 +24,8 @@ export default function ProductCard({ product }: ProductCardProps) {
   } = product;
 
   const currentVotes = useProductVotes(id, baseVotes);
-  const [backImageUrl, setBackImageUrl] = useState<string | null>(null);
-  const [isBackGenerating, setIsBackGenerating] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    const cached = getBackCachedImageUrl(id);
-    if (cached) {
-      setBackImageUrl(cached);
-      setIsBackGenerating(false);
-      return;
-    }
-
-    setIsBackGenerating(isBackViewGenerating(id));
-
-    const onCached = (event: Event) => {
-      const { cacheKey, imageUrl: cachedUrl } = (
-        event as CustomEvent<{ cacheKey: string; imageUrl: string }>
-      ).detail;
-
-      if (cacheKey === getBackViewCacheKey(id)) {
-        setBackImageUrl(cachedUrl);
-        setIsBackGenerating(false);
-      }
-    };
-
-    window.addEventListener(IMAGE_CACHED_EVENT, onCached);
-    return () => window.removeEventListener(IMAGE_CACHED_EVENT, onCached);
-  }, [id]);
-
   const productHref = `/product/${id}`;
-  const showBackOnHover = isHovered && Boolean(backImageUrl);
-  const showHoverPlaceholder = isHovered && !backImageUrl && isBackGenerating;
 
   return (
     <article className="group flex flex-col bg-white text-black">
@@ -79,29 +40,21 @@ export default function ProductCard({ product }: ProductCardProps) {
             fallbackSrc={fallbackImageUrl}
             alt={title}
             className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
-              showBackOnHover ? "opacity-0" : "opacity-100"
+              isHovered ? "opacity-0" : "opacity-100"
             }`}
           />
-          {backImageUrl && (
-            <ProductImage
-              src={backImageUrl}
-              fallbackSrc={fallbackImageUrl}
-              alt={`${title} — back view`}
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
-                showBackOnHover ? "opacity-100" : "opacity-0"
-              }`}
-            />
-          )}
-          {showHoverPlaceholder && (
-            <>
-              <div className="absolute inset-0 backdrop-blur-md bg-white/40" />
-              <div className="absolute inset-0 image-shimmer opacity-70" />
-            </>
-          )}
+          <ProductImage
+            src={backImageUrl}
+            fallbackSrc={fallbackImageUrl}
+            alt={`${title} — back view`}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+              isHovered ? "opacity-100" : "opacity-0"
+            }`}
+          />
           <span className="absolute bottom-3 left-3 text-[10px] uppercase tracking-[0.18em] text-neutral-500">
             {daysLeft}d left
           </span>
-          {showBackOnHover && (
+          {isHovered && (
             <span className="absolute bottom-3 right-3 bg-white/90 px-2 py-1 text-[9px] uppercase tracking-[0.14em] text-neutral-600">
               Back View
             </span>

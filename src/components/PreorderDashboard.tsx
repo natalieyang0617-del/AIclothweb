@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ProductImage from "@/components/ProductImage";
+import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { SITE_FOOTER } from "@/data/mockProducts";
+import { useStoreSync } from "@/hooks/useStoreSync";
 import {
   enrichPreorders,
   formatPreorderTime,
@@ -17,34 +18,26 @@ import {
 
 function LaunchNotificationForm() {
   const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
 
   useEffect(() => {
     if (!toastVisible) {
       return;
     }
-
-    const timer = window.setTimeout(() => {
-      setToastVisible(false);
-    }, 4200);
-
+    const timer = window.setTimeout(() => setToastVisible(false), 4200);
     return () => window.clearTimeout(timer);
   }, [toastVisible]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     const trimmed = email.trim();
-    if (!trimmed || !trimmed.includes("@")) {
+    if (!trimmed.includes("@")) {
       return;
     }
 
-    setIsSubmitting(true);
     saveLaunchNotificationEmail(trimmed);
     setEmail("");
     setToastVisible(true);
-    setIsSubmitting(false);
   }
 
   return (
@@ -77,10 +70,9 @@ function LaunchNotificationForm() {
             />
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full border border-black bg-black px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-white transition-colors hover:bg-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
+              className="w-full border border-black bg-black px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-white transition-colors hover:bg-neutral-900"
             >
-              {isSubmitting ? "Reserving…" : "Reserve Priority Access"}
+              Reserve Priority Access
             </button>
           </form>
         </div>
@@ -112,21 +104,12 @@ export default function PreorderDashboard() {
   const [preorders, setPreorders] = useState<EnrichedPreorder[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  useEffect(() => {
-    const refresh = () => {
-      setPreorders(enrichPreorders(getAllPreorders()));
-      setIsHydrated(true);
-    };
-
-    refresh();
-    window.addEventListener(PREORDERS_UPDATED_EVENT, refresh);
-    window.addEventListener("storage", refresh);
-
-    return () => {
-      window.removeEventListener(PREORDERS_UPDATED_EVENT, refresh);
-      window.removeEventListener("storage", refresh);
-    };
+  const refresh = useCallback(() => {
+    setPreorders(enrichPreorders(getAllPreorders()));
+    setIsHydrated(true);
   }, []);
+
+  useStoreSync(refresh, [PREORDERS_UPDATED_EVENT]);
 
   const totalValue = sumPreorderValue(preorders);
 
@@ -229,15 +212,7 @@ export default function PreorderDashboard() {
       </main>
 
       <LaunchNotificationForm />
-
-      <footer className="border-t border-neutral-200 bg-white px-6 py-10 sm:px-10 lg:px-16">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <span className="text-[11px] uppercase tracking-[0.28em] text-neutral-500">
-            {SITE_FOOTER.brand}
-          </span>
-          <p className="text-[11px] text-neutral-400">{SITE_FOOTER.tagline}</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

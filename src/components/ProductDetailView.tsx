@@ -1,67 +1,58 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import ProductImage from "@/components/ProductImage";
 import LaunchProgressBar from "@/components/product/LaunchProgressBar";
 import SiteHeader from "@/components/SiteHeader";
-import { useProductDetail } from "@/hooks/useProductDetail";
+import { useProductVotes } from "@/hooks/useProductVotes";
 import type { Product } from "@/data/mockProducts";
+import {
+  getLatestPreorderForProduct,
+  incrementProductVotes,
+  savePreorder,
+  type ProductSize,
+} from "@/lib/preorder-storage";
 
 type ViewAngle = "front" | "back";
+const SIZES: ProductSize[] = ["XS", "S", "M", "L"];
 
-interface ProductDetailViewProps {
-  product: Product;
-}
-
-const toggleBaseClass =
-  "flex-1 border px-4 py-3 text-[10px] font-medium uppercase tracking-[0.16em] transition-colors";
-
-function toggleClass(active: boolean): string {
-  return active
+const toggleClass = (active: boolean) =>
+  active
     ? "border-black bg-black text-white"
     : "border-neutral-300 bg-white text-neutral-700 hover:border-black";
-}
 
-function ProductViewToggle({
-  viewAngle,
-  onChange,
-}: {
-  viewAngle: ViewAngle;
-  onChange: (angle: ViewAngle) => void;
-}) {
-  return (
-    <div className="mt-4 flex gap-2">
-      <button
-        type="button"
-        onClick={() => onChange("front")}
-        className={`${toggleBaseClass} ${toggleClass(viewAngle === "front")}`}
-      >
-        Front View
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange("back")}
-        className={`${toggleBaseClass} ${toggleClass(viewAngle === "back")}`}
-      >
-        Back View
-      </button>
-    </div>
+export default function ProductDetailView({ product }: { product: Product }) {
+  const [viewAngle, setViewAngle] = useState<ViewAngle>("front");
+  const [selectedSize, setSelectedSize] = useState<ProductSize>("M");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(
+    null,
   );
-}
 
-export default function ProductDetailView({ product }: ProductDetailViewProps) {
-  const {
-    viewAngle,
-    setViewAngle,
-    activeImageUrl,
-    showBackShimmer,
-    sizes,
-    selectedSize,
-    setSelectedSize,
-    currentVotes,
-    isSubmitting,
-    confirmationMessage,
-    confirmPreorder,
-  } = useProductDetail(product);
+  const currentVotes = useProductVotes(product.id, product.currentVotes);
+  const activeImageUrl =
+    viewAngle === "back" ? product.backImageUrl : product.imageUrl;
+
+  useEffect(() => {
+    const latest = getLatestPreorderForProduct(product.id);
+    if (latest) {
+      setSelectedSize(latest.size);
+    }
+  }, [product.id]);
+
+  async function confirmPreorder() {
+    setIsSubmitting(true);
+    setConfirmationMessage(null);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    const nextVotes = incrementProductVotes(product.id, product.currentVotes);
+    const record = savePreorder(product.id, selectedSize);
+
+    setConfirmationMessage(
+      `Preorder confirmed — Size ${record.size}. You are voter #${nextVotes}.`,
+    );
+    setIsSubmitting(false);
+  }
 
   return (
     <div className="min-h-screen bg-[#f9f9f9] text-zinc-900">
@@ -72,26 +63,29 @@ export default function ProductDetailView({ product }: ProductDetailViewProps) {
           <section>
             <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
               <ProductImage
-                key={`${product.id}-${viewAngle}-${activeImageUrl}`}
+                key={`${product.id}-${viewAngle}`}
                 src={activeImageUrl}
                 fallbackSrc={product.fallbackImageUrl}
                 alt={`${product.title} — ${viewAngle} view`}
                 className="h-full w-full object-cover transition-opacity duration-500"
               />
-              {showBackShimmer && (
-                <div className="absolute inset-0 image-shimmer backdrop-blur-[2px]" />
-              )}
-              {showBackShimmer && (
-                <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-[10px] uppercase tracking-[0.2em] text-neutral-600">
-                  Generating back view…
-                </span>
-              )}
               <span className="absolute bottom-4 left-4 bg-white/90 px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] text-neutral-600">
                 {viewAngle === "front" ? "Front View" : "Back View"}
               </span>
             </div>
 
-            <ProductViewToggle viewAngle={viewAngle} onChange={setViewAngle} />
+            <div className="mt-4 flex gap-2">
+              {(["front", "back"] as const).map((angle) => (
+                <button
+                  key={angle}
+                  type="button"
+                  onClick={() => setViewAngle(angle)}
+                  className={`flex-1 border px-4 py-3 text-[10px] font-medium uppercase tracking-[0.16em] transition-colors ${toggleClass(viewAngle === angle)}`}
+                >
+                  {angle === "front" ? "Front View" : "Back View"}
+                </button>
+              ))}
+            </div>
           </section>
 
           <section>
@@ -134,7 +128,7 @@ export default function ProductDetailView({ product }: ProductDetailViewProps) {
                 Select Size
               </p>
               <div className="grid grid-cols-4 gap-2">
-                {sizes.map((size) => (
+                {SIZES.map((size) => (
                   <button
                     key={size}
                     type="button"
